@@ -1,0 +1,124 @@
+/*
+Interfacing a GENIE LP20 calculator printing module with Arduino (Nano w/ Atmega 328)
+
+The printer has:
+----------------
+- a DC motor (5V, connected to pin2 via a darlington transistor & freewheeling diode)
+- an electromagnet (5V coil, connected to pin3 via a darlington transistor & freewheeling diode)
+- an encoder (connected to pin4 with a 20K pulldown resistor)
+- power source for the encoder (requires external 220 OHM current limiting resistor)
+
+The printer module works as follows:
+-------------------------------------
+First, the motor has to be switched on (and it takes a while until it spins at full speed).
+Then, the encoder can be read out: It always gives 13 short LOW pulses and then one long LOW pulse for sync.
+The coil can be switched on after any of those pulses, which will then print different characters.
+If the coil is switched on for 20MS, the printhead will move to the next position (from right to left) on in order to print the next character.
+If the coil is switched on for 50MS, the printhead will return home (right) after printing the character and the paper will feed one line.
+The first three characters which can be printed (rightmost on the paper) are special characters (+,X,÷,DIAMOND,*,DELTA,G,M,C,SPACE,=,-,%,LINE_FEED).
+After printing the three special characters, the printhead uses another print wheel and numbers and some other special characters can be printed (·,0,1,2,3,4,5,6,7,8,9,#,-,COMMA).
+After printing, the motor should be switched off again.
+
+Pinout of the printer module:
+-----------------------------
+BLK:  Coil GND
+BLK:  Coil +5V
+RED:  Motor +5V
+YEL:  Motor GND
+GRE:  Encoder output - connected to Arduino and via 20K pulldown resistor to GND
+WHI:  +5V (encoder power supply)
+ORA:  +5V (encoder power supply)
+BLU:  via 220 OHM to GND (encoder power supply)
+
+*/
+
+#define MOTOR_ON  digitalWrite(2,HIGH);
+#define MOTOR_OFF digitalWrite(2,LOW);
+#define COIL_ON   digitalWrite(3,HIGH);
+#define COIL_OFF  digitalWrite(3,LOW);
+#define ENCODER   !digitalRead(4)
+
+
+void setup(){
+  pinMode(2,OUTPUT); //motor
+  pinMode(3,OUTPUT); //coil
+  pinMode(4,INPUT);  //encoder
+  Serial.begin(9600); 
+
+}
+void loop (){
+
+
+  MOTOR_ON
+  delay(700);
+  //print_character(0);// +
+  //print_character(1);// X
+  //print_character(2);// ÷
+  //print_character(3);// DIAMOND
+  //print_character(4);// *
+  //print_character(5);// DELTA
+  //print_character(6);// G
+  //print_character(7);// M
+  //print_character(8);// C
+  //print_character(9);// SPACE
+  //print_character(10);// =
+  //print_character(11);// -
+  //print_character(12);// %
+  //print_character(13);// LINE_FEED
+  
+  print_character(13,1);// LINE_FEED
+  print_character(13,1);// LINE_FEED
+  
+  for (int j=0;j<10;j++){
+    print_character(9,0);// SPACE
+    print_character(9,0);// SPACE
+    print_character(9,0);// SPACE
+  
+    for (int i=0;i<8;i++){
+     print_character(12,0);
+    }
+    
+    print_character(j+1,0);
+    for (int i=0;i<7;i++){
+     print_character(12,0);
+    }
+    
+    print_character(12,1);
+  }
+  
+  print_character(13,1);// NEW_LINE
+  print_character(13,1);// NEW_LINE
+  
+
+  MOTOR_OFF
+
+  while(1){
+  }
+}
+
+
+void print_character(int desired_print_character, boolean new_line){
+    int encoder_count = 0;
+    int encoder_index = 20;
+    while(desired_print_character != encoder_index){
+      if (ENCODER) {
+        encoder_count++;
+        delayMicroseconds(100);
+      }
+      if (!ENCODER){
+        if (encoder_count>0){
+          if (encoder_count<30){
+            encoder_index++;
+          }
+          if (encoder_count>50){
+            encoder_index=0;
+          }
+        }
+        encoder_count=0;
+      }
+    }
+    COIL_ON
+    if (new_line) delay(30);
+    delay(20);
+    COIL_OFF
+  }
