@@ -23,11 +23,11 @@ After printing, the motor should be switched off again.
 
 Pinout of the printer module:
 -----------------------------
-BLK:  Coil GND
-BLK:  Coil +5V
-RED:  Motor +5V
-YEL:  Motor GND
-GRE:  Encoder output - connected to Arduino and via 20K pulldown resistor to GND
-WHI:  +5V (encoder power supply)
-ORA:  +5V (encoder power supply)
-BLU:  via 220 OHM to GND (encoder power supply)
+- BLK:  Coil GND
+- BLK:  Coil +5V
+- RED:  Motor +5V
+- YEL:  Motor GND
+- GRE:  Encoder output - connected to Arduino and via 20K pulldown resistor to GND
+- WHI:  +5V (encoder power supply)
+- ORA:  +5V (encoder power supply)
+- BLU:  via 220 OHM to GND (encoder power supply)
